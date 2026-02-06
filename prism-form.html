@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM - Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0a0e14; --text-primary: #ffffff; --text-secondary: #8ba0b6;
+            --accent-cyan: #00dddf; --accent-red: #ff3333;
+            --glass-bg: rgba(30, 35, 45, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
+            --glow-cyan: 0 0 15px rgba(0, 221, 223, 0.3);
+        }
+        body {
+            background: radial-gradient(circle at top right, #1a202c, #0a0e14);
+            color: var(--text-primary); padding: 30px; font-family: 'Segoe UI', sans-serif;
+        }
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 25px; margin-bottom: 25px;
+        }
+        h1 { color: var(--accent-cyan); text-align: center; }
+        h2 { color: var(--text-secondary); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 20px;}
+        .input-field {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            border-bottom: 2px solid #333; padding: 12px; color: white; border-radius: 6px; margin-bottom: 15px;
+        }
+        /* Fix for select dropdowns to be visible on dark background */
+        select.input-field { background: #1a202c; color: white; }
+        
+        .submit-btn {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--accent-cyan), #008c8e);
+            border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; font-size: 1.1rem;
+        }
+        .form-row { display: flex; gap: 15px; }
+        .form-row > * { flex: 1; }
+        
+        /* FINGERPRINT STYLES */
+        .scan-btn { background: #333; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 10px; width: 100%; cursor: pointer; transition: 0.3s; }
+        .scan-btn:hover { background: var(--accent-cyan); color: black; box-shadow: 0 0 15px var(--accent-cyan); }
+        .scan-status { font-weight: bold; margin-top: 10px; text-align: center; min-height: 20px;}
+        .scanned-success { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+    </style>
+</head>
+<body>
+    <div style="max-width: 900px; margin: auto;">
+        <h1><i class="fa-solid fa-user-plus"></i> New Patient Registration</h1>
+        
+        <form id="regForm" enctype="multipart/form-data">
+            
+            <section class="glass-panel" style="border: 1px solid var(--accent-cyan);">
+                <h2><i class="fa-solid fa-lock"></i> Security & Biometrics (Mandatory)</h2>
+                <div class="form-row">
+                    <div>
+                        <label>1. Create Passkey</label>
+                        <input type="text" name="passkey" class="input-field" placeholder="Create Unique Passkey" required>
+                    </div>
+                    <div>
+                        <label>2. Biometric Enroll</label>
+                        <button type="button" id="scanBtn" class="scan-btn"><i class="fa-solid fa-fingerprint"></i> START SENSOR SCAN</button>
+                        <input type="hidden" name="fingerprint_id" id="fingerprintId" required>
+                        <div id="scanStatus" class="scan-status">Not Scanned</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass-panel">
+                <h2><i class="fa-solid fa-id-card"></i> Personal Info</h2>
+                <div class="form-row">
+                    <input type="text" name="fullName" class="input-field" placeholder="Full Name" required>
+                    <input type="file" name="photoUpload" class="input-field">
+                </div>
+                <div class="form-row">
+                    <input type="date" name="dob" class="input-field">
+                    <input type="number" name="age" class="input-field" placeholder="Age">
+                    <select name="bloodGroup" class="input-field" required>
+                        <option value="">Blood Group...</option>
+                        <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
+                        <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
+                    </select>
+                </div>
+                 <div class="form-row">
+                    <input type="text" name="emergencyName" class="input-field" placeholder="Emergency Contact Name">
+                    <input type="text" name="emergencyPhone" class="input-field" placeholder="Emergency Phone">
+                </div>
+                 <div class="form-row">
+                    <input type="text" name="doctorName" class="input-field" placeholder="Primary Doctor Name">
+                    <input type="text" name="doctorPhone" class="input-field" placeholder="Doctor Phone">
+                </div>
+            </section>
+
+            <section class="glass-panel">
+                <h2><i class="fa-solid fa-notes-medical"></i> Medical Data</h2>
+                <textarea name="allergies" class="input-field" placeholder="Allergies (Food, Drug, Latex)..."></textarea>
+                <textarea name="chronic" class="input-field" placeholder="Chronic Diseases..."></textarea>
+                <textarea name="implants" class="input-field" placeholder="Implants (Pacemaker, Stents)..."></textarea>
+                
+                <h3>Medications</h3>
+                <div id="med-container">
+                    <div class="form-row" style="margin-bottom: 10px;">
+                        <input type="text" name="med_name[]" class="input-field" placeholder="Medication Name">
+                        <input type="text" name="med_dose[]" class="input-field" placeholder="Dosage">
+                    </div>
+                </div>
+                <button type="button" onclick="addMedRow()" style="color:var(--accent-cyan); background:none; border:none; cursor:pointer;">+ Add another medication</button>
+            </section>
+
+             <section class="glass-panel">
+                <h2><i class="fa-solid fa-heart-pulse"></i> Vitals & Lifestyle</h2>
+                <div class="form-row">
+                    <input type="text" name="bp" class="input-field" placeholder="BP (e.g. 120/80)">
+                    <input type="number" name="heartrate" class="input-field" placeholder="HR (bpm)">
+                    <input type="number" name="bloodsugar" class="input-field" placeholder="Sugar (mg/dL)">
+                    <input type="number" name="cholesterol" class="input-field" placeholder="Cholesterol">
+                </div>
+                 <div class="form-row">
+                     <select name="smokingStatus" class="input-field">
+                        <option value="">Smoking Status...</option>
+                        <option>Non-Smoker</option>
+                        <option>Former Smoker</option>
+                        <option>Current Smoker</option>
+                    </select>
+                     <select name="dietType" class="input-field">
+                        <option value="">Diet Type...</option>
+                        <option>No restrictions</option>
+                        <option>Vegetarian</option>
+                        <option>Low Sodium</option>
+                        <option>Diabetic</option>
+                    </select>
+                     <select name="exerciseLevel" class="input-field">
+                        <option value="">Exercise Level...</option>
+                        <option>Sedentary</option>
+                        <option>Moderate</option>
+                        <option>Active</option>
+                    </select>
+                </div>
+                
+                <div class="form-row" style="margin-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="organDonor" value="yes" style="width: 20px; height: 20px; accent-color: var(--accent-cyan);"> Organ Donor
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="religiousRestrictions" value="yes" style="width: 20px; height: 20px; accent-color: var(--accent-cyan);"> Religious Restrictions
+                    </label>
+                </div>
+
+                <textarea name="otherNotes" class="input-field" placeholder="Other medical notes or directives..." style="margin-top: 15px; height: 100px;"></textarea>
+            </section>
+
+            <button type="submit" class="submit-btn" id="subBtn">REGISTER PATIENT</button>
+        </form>
+    </div>
+
+    <script>
+        function addMedRow() {
+            const div = document.createElement('div');
+            div.className = 'form-row';
+            div.style.marginBottom = '10px';
+            div.innerHTML = '<input type="text" name="med_name[]" class="input-field" placeholder="Medication Name"><input type="text" name="med_dose[]" class="input-field" placeholder="Dosage">';
+            document.getElementById('med-container').appendChild(div);
+        }
+
+        // --- UPDATED FINGERPRINT LOGIC (STREAMING) ---
+        const scanBtn = document.getElementById('scanBtn');
+        const scanStatus = document.getElementById('scanStatus');
+        const fingerInput = document.getElementById('fingerprintId');
+
+        scanBtn.addEventListener('click', async () => {
+            // Reset UI
+            scanStatus.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Connecting to Sensor...';
+            scanStatus.style.color = "var(--text-secondary)";
+            scanBtn.disabled = true;
+            fingerInput.value = ""; // Clear previous ID
+
+            try {
+                // START STREAMING REQUEST
+                const response = await fetch('/api/scan-enroll', { method: 'POST' });
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete lines from the buffer
+                    let boundary = buffer.indexOf('\n');
+                    while (boundary !== -1) {
+                        const line = buffer.substring(0, boundary);
+                        buffer = buffer.substring(boundary + 1);
+                        boundary = buffer.indexOf('\n');
+
+                        if (line.trim()) {
+                            try {
+                                const data = JSON.parse(line);
+                                
+                                // HANDLE STATUS UPDATES
+                                if (data.status === "starting") {
+                                    scanStatus.innerText = data.message;
+                                } 
+                                else if (data.status === "step") {
+                                    // Highlight instructions clearly
+                                    scanStatus.innerHTML = `<span style="color:var(--accent-cyan); font-weight:bold; font-size:1.1rem;">${data.message}</span>`;
+                                }
+                                else if (data.status === "done") {
+                                    if (data.success) {
+                                        scanStatus.className = "scan-status scanned-success";
+                                        scanStatus.innerHTML = `<i class="fa-solid fa-check"></i> SUCCESS! ID: ${data.id}`;
+                                        fingerInput.value = data.id;
+                                    } else {
+                                        scanStatus.innerHTML = `<span style="color:var(--accent-red)">${data.message}</span>`;
+                                        scanBtn.disabled = false;
+                                    }
+                                    return; // Stop reading
+                                }
+                            } catch (e) {
+                                console.error("JSON Parse Error", e);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                scanStatus.innerText = "Connection Error";
+                scanBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Check if fingerprint is enrolled
+            if(!fingerInput.value) {
+                alert("You must enroll a fingerprint before registering!");
+                return;
+            }
+
+            const btn = document.getElementById('subBtn');
+            btn.disabled = true;
+            btn.innerText = "Registering...";
+
+            const formData = new FormData(e.target);
+            // Handle checkboxes (if not checked, they don't send anything, so we default to 'no' in backend, but good to be safe)
+            if(!e.target.organDonor.checked) formData.set('organDonor', 'no');
+            if(!e.target.religiousRestrictions.checked) formData.set('religiousRestrictions', 'no');
+
+            try {
+                const res = await fetch('/api/register', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.success) {
+                    alert(data.message);
+                    window.location.href = '/'; // Go back to home
+                } else {
+                    alert("Error: " + data.message);
+                    btn.disabled = false;
+                    btn.innerText = "REGISTER PATIENT";
+                }
+            } catch(err) {
+                console.error(err);
+                alert("Server Error");
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
