@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM - Emergency View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+         :root {
+            --bg-main: #0a0e14; --text-primary: #ffffff; --text-secondary: #8ba0b6;
+            --accent-cyan: #00dddf; --accent-red: #ff3333;
+            --glass-bg: rgba(30, 35, 45, 0.6);
+        }
+        body {
+            background: var(--bg-main); color: var(--text-primary); padding: 20px; font-family: 'Segoe UI', sans-serif;
+        }
+        .top-banner { background: linear-gradient(90deg, #1a202c, var(--accent-red)); padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; border-radius: 8px; margin-bottom: 20px; animation: pulse-banner 2s infinite alternate;}
+        
+        .dashboard-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start;}
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px;}
+        .critical-panel { border: 2px solid var(--accent-red); box-shadow: 0 0 20px rgba(255, 51, 51, 0.2); }
+        
+        .profile-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px; display: block; border: 3px solid var(--accent-cyan);}
+        .blood-display { font-size: 3rem; color: var(--accent-red); font-weight: bold; text-align: center; display: block; margin: 10px 0; text-shadow: 0 0 10px var(--accent-red);}
+        
+        h2 { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .data-label { color: var(--text-secondary); font-size: 0.9rem; display: block; margin-top: 10px; }
+        .data-value { font-size: 1.1rem; font-weight: 500; }
+        .alert-value { color: var(--accent-red); font-weight: bold; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        @keyframes pulse-banner { from { box-shadow: 0 0 10px var(--accent-red); } to { box-shadow: 0 0 30px var(--accent-red); } }
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="top-banner"><i class="fa-solid fa-truck-medical"></i> EMERGENCY PATIENT VIEW - CRITICAL DATA</div>
+    
+    <div class="dashboard-grid">
+        <aside>
+            <div class="glass-panel" style="text-align: center;">
+                <img id="db_photo" src="" alt="No Photo" class="profile-img" onerror="this.src='data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\' stroke-width=\'3\' stroke=\'%238ba0b6\' fill=\'none\'%3E%3Cpath d=\'M32,35.87a16.82,16.82,0,0,1-14.57-8.41c-2.83-4.91-2.83-12,0-16.92A16.82,16.82,0,0,1,32,2.12a16.82,16.82,0,0,1,14.57,8.41c2.83,4.91,2.83,12,0,16.92A16.82,16.82,0,0,1,32,35.87Z\'/%3E%3Cpath d=\'M5.51,58.66a26.45,26.45,0,0,1,53,0\'/%3E%3C/svg%3E'">
+                <h1 id="db_name">Loading...</h1>
+                <p><span id="db_age"></span> yrs / DOB: <span id="db_dob"></span></p>
+                <span class="blood-display" id="db_blood"></span>
+            </div>
+             <div class="glass-panel">
+                <h2><i class="fa-solid fa-phone"></i> Contacts</h2>
+                <span class="data-label">Emergency Contact:</span>
+                <span class="data-value" id="db_em_name"></span> <br>
+                <span class="data-value" id="db_em_phone"></span>
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <span class="data-label">Primary Doctor:</span>
+                    <span class="data-value" id="db_doc_name"></span> <br>
+                    <span class="data-value" id="db_doc_phone"></span>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <div class="glass-panel critical-panel">
+                 <h2 style="color: var(--accent-red);"><i class="fa-solid fa-triangle-exclamation"></i> CRITICAL ALERTS</h2>
+                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div><span class="data-label">Allergies:</span><span class="data-value alert-value" id="db_allergies"></span></div>
+                    <div><span class="data-label">Chronic Diseases:</span><span class="data-value" id="db_chronic"></span></div>
+                    <div><span class="data-label">Implants/Devices:</span><span class="data-value" id="db_implants"></span></div>
+                 </div>
+            </div>
+
+             <div class="glass-panel">
+                <h2><i class="fa-solid fa-pills"></i> Current Medications</h2>
+                <p id="db_meds" class="data-value"></p>
+            </div>
+
+            <div class="info-grid">
+                <div class="glass-panel">
+                    <h2><i class="fa-solid fa-heart-pulse"></i> Baseline Vitals</h2>
+                    <span class="data-label">BP:</span> <span class="data-value" id="db_bp"></span>
+                    <span class="data-label">HR:</span> <span class="data-value" id="db_hr"></span>
+                    <span class="data-label">Sugar:</span> <span class="data-value" id="db_sugar"></span>
+                    <span class="data-label">Cholesterol:</span> <span class="data-value" id="db_chol"></span>
+                </div>
+                 <div class="glass-panel">
+                    <h2><i class="fa-solid fa-clipboard-list"></i> Lifestyle & Directives</h2>
+                    <span class="data-label">Smoking:</span> <span class="data-value" id="db_smoking"></span>
+                    <span class="data-label">Diet:</span> <span class="data-value" id="db_diet"></span>
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <span class="data-label" style="color: var(--accent-cyan);">Organ Donor:</span> <span class="data-value" id="db_donor"></span><br>
+                        <span class="data-label" style="color: var(--accent-red);">Religious Restrictions:</span> <span class="data-value" id="db_religion"></span>
+                    </div>
+                </div>
+            </div>
+             <div class="glass-panel">
+                <h2><i class="fa-solid fa-note-sticky"></i> Other Notes</h2>
+                <p id="db_notes" class="data-value"></p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const dataStr = sessionStorage.getItem('prismPatientData');
+            
+            if(!dataStr || dataStr === "undefined" || dataStr === "null") {
+                alert("No active emergency session Data found. Returning to home.");
+                // CHANGED: Redirect to root /
+                window.location.href = '/';
+                return;
+            }
+
+            let data;
+            try {
+                 data = JSON.parse(dataStr);
+            } catch (e) {
+                alert("Error parsing patient data.");
+                return;
+            }
+
+            try {
+                // Identity & Contacts
+                document.getElementById('db_name').innerText = data.full_name;
+                document.getElementById('db_age').innerText = data.age || '--';
+                document.getElementById('db_dob').innerText = data.dob ? new Date(data.dob).toLocaleDateString() : '--';
+                document.getElementById('db_blood').innerText = data.blood_group;
+                
+                // CHANGED: Ensure photo path is correct relative to the server
+                if(data.photo_path) document.getElementById('db_photo').src = '/uploads/' + data.photo_path;
+
+                document.getElementById('db_em_name').innerText = data.emergency_contact_name || 'N/A';
+                document.getElementById('db_em_phone').innerText = data.emergency_contact_phone || 'N/A';
+                // Doctor Info
+                document.getElementById('db_doc_name').innerText = data.doctor_name || 'N/A';
+                document.getElementById('db_doc_phone').innerText = data.doctor_phone || 'N/A';
+
+                // Critical & Meds
+                document.getElementById('db_allergies').innerText = data.allergies || 'None reported';
+                document.getElementById('db_chronic').innerText = data.chronic_diseases || 'None reported';
+                document.getElementById('db_implants').innerText = data.implants || 'None reported';
+                document.getElementById('db_meds').innerText = data.medications || 'No medications listed.';
+
+                // Vitals
+                document.getElementById('db_bp').innerText = data.vitals_bp || '--';
+                document.getElementById('db_hr').innerText = data.vitals_hr ? data.vitals_hr + ' bpm' : '--';
+                document.getElementById('db_sugar').innerText = data.vitals_sugar ? data.vitals_sugar + ' mg/dL' : '--';
+                document.getElementById('db_chol').innerText = data.vitals_cholesterol ? data.vitals_cholesterol + ' mg/dL' : '--';
+
+                // Lifestyle & Directives
+                document.getElementById('db_smoking').innerText = data.smoking_status || 'N/A';
+                document.getElementById('db_diet').innerText = data.diet_type || 'N/A';
+                document.getElementById('db_donor').innerText = (data.organ_donor || 'no').toUpperCase();
+                document.getElementById('db_religion').innerText = (data.religious_restrictions || 'no').toUpperCase();
+
+                document.getElementById('db_notes').innerText = data.other_notes || 'No notes.';
+            } catch (err) {
+                console.error("Error populating dashboard fields.", err);
+            }
+
+        });
+    </script>
+</body>
+</html>
